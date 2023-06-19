@@ -9,6 +9,10 @@ using Amazon.DynamoDBv2.Model.Internal.MarshallTransformations;
 using System.Runtime.CompilerServices;
 using Amazon.S3;
 using System.Text;
+using AWS.Lambda.Powertools.Logging;
+using AWS.Lambda.Powertools.Tracing;
+using AWS.Lambda.Powertools.Metrics;
+using Amazon.XRay.Recorder.Handlers.AwsSdk;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -26,12 +30,16 @@ public class Functions
     /// </summary>
     public Functions()
     {
+        AWSSDKHandler.RegisterXRayForAllServices();
     }
 
     /// <summary>
     /// Root route that provides information about the other requests that can be made.
     /// </summary>
     /// <returns>API descriptions.</returns>
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "DefaultFunction")]
     [HttpApi(LambdaHttpMethod.Get, "/")]
     public string Default()
@@ -52,7 +60,9 @@ public class Functions
     /// <param name="context"></param>
     /// <param name="ssmClient"></param>
     /// <returns></returns>
-
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "ReadParameter")]
     [HttpApi(LambdaHttpMethod.Get, "/readparameter")]
     public async Task<string> ReadParameter(ILambdaContext context, [FromServices] IAmazonSimpleSystemsManagement ssmClient)
@@ -71,7 +81,9 @@ public class Functions
     /// <param name="context"></param>
     /// <param name="ssmClient"></param>
     /// <returns></returns>
-
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "WriteParameter")]
     [HttpApi(LambdaHttpMethod.Post, "/writeparameter")]
     public async Task<string> WriteParameter([FromBody] string value, ILambdaContext context, [FromServices] IAmazonSimpleSystemsManagement ssmClient)
@@ -96,10 +108,15 @@ public class Functions
     /// <param name="ctx"></param>
     /// <param name="dbClient"></param>
     /// <returns></returns>
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "WriteTableItem")]
     [HttpApi(LambdaHttpMethod.Post, "/writetableitem")]
     public async Task<TableItem> WriteTableItem([FromBody] TableItem item, ILambdaContext ctx, [FromServices] IAmazonDynamoDB dbClient)
     {
+        Metrics.AddMetric("AmountAdded", item.Amount, MetricUnit.Count);
+
         var result = await dbClient.PutItemAsync(new()
         {
             TableName = GetEnv("TABLE"),
@@ -122,6 +139,9 @@ public class Functions
     /// <param name="ctx"></param>
     /// <param name="dbClient"></param>
     /// <returns></returns>
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "ReadTableItem")]
     [HttpApi(LambdaHttpMethod.Get, "/readtableitem/{id}")]
     public async Task<TableItem> ReadTableItem(string id, ILambdaContext ctx, [FromServices] IAmazonDynamoDB dbClient)
@@ -166,10 +186,15 @@ public class Functions
     /// <param name="context"></param>
     /// <param name="s3Client"></param>
     /// <returns></returns>
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "WriteS3")]
     [HttpApi(LambdaHttpMethod.Post, "/writeS3item")]
     public async Task<string> WriteS3Item([FromBody]S3Item item, ILambdaContext context, [FromServices] IAmazonS3 s3Client)
     {
+        Logger.LogInformation(item);
+
         var result = await s3Client.PutObjectAsync(new() 
         {
             BucketName = GetEnv("BUCKET"),
@@ -187,6 +212,9 @@ public class Functions
     /// <param name="context"></param>
     /// <param name="s3Client"></param>
     /// <returns></returns>
+    [Metrics(CaptureColdStart = true)]
+    [Tracing]
+    [Logging]
     [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "ReadS3")]
     [HttpApi(LambdaHttpMethod.Get, "/readS3item/{key}")]
     public async Task<string> ReadS3Item(string key, ILambdaContext context, [FromServices] IAmazonS3 s3Client)
@@ -199,7 +227,11 @@ public class Functions
             Key = key,
         });
 
-        if(result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+        Tracing.WithSubsegment("loggingResponse", async (subsegment) => {
+            await Task.Delay(DateTime.Now.Millisecond);
+        });
+
+        if (result.HttpStatusCode != System.Net.HttpStatusCode.OK)
         {
            return "Not Found!";
         }

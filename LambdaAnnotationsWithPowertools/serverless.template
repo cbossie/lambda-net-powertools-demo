@@ -4,6 +4,7 @@
   "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v0.13.2.0).",
   "Globals": {
     "Function": {
+      "Tracing": "Active",
       "Environment": {
         "Variables": {
           "TABLE": {
@@ -17,7 +18,16 @@
           },
           "SECRET": {
             "Ref": "TestSecret"
-          }
+          },
+          "POWERTOOLS_SERVICE_NAME": "PowertoolsDemoService",
+          "POWERTOOLS_LOG_LEVEL": "Debug",
+          "POWERTOOLS_LOGGER_CASE": "CamelCase",
+          "POWERTOOLS_LOGGER_LOG_EVENT": "true",
+          "POWERTOOLS_LOGGER_SAMPLE_RATE": "0",
+          "POWERTOOLS_METRICS_NAMESPACE": "PowertoolsDemoMetrics",
+          "POWERTOOLS_TRACE_DISABLED": "false",
+          "POWERTOOLS_TRACER_CAPTURE_RESPONSE": "true",
+          "POWERTOOLS_TRACER_CAPTURE_ERROR": "true"
         }
       }
     }

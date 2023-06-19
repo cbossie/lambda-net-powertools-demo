@@ -46,18 +46,25 @@ Annotations - Tracing
 
 - Add Active Tracing to the Lambda Functions
 
+- Update SDK to trace
+
+ AWSSDKHandler.RegisterXRayForAllServices();
+
 [Tracing]
 
 
 Add a subsegment
-Tracing.WithSubsegment("loggingResponse", (subsegment) => {
-    await Task.Delay(DateTime.Now.Milliseconds);
+Tracing.WithSubsegment("loggingResponse", async (subsegment) => {
+    await Task.Delay(DateTime.Now.Millisecond);
 });
 
 
 
 Annotations - Metrics
 =====================
+
+
+
 
 [Metrics(CaptureColdStart = true)]
 

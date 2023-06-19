@@ -2,8 +2,70 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v0.13.2.0).",
+  "Globals": {
+    "Function": {
+      "Environment": {
+        "Variables": {
+          "TABLE": {
+            "Ref": "DataTable"
+          },
+          "BUCKET": {
+            "Ref": "StorageBucket"
+          },
+          "PARAMETER": {
+            "Ref": "TestParameter"
+          },
+          "SECRET": {
+            "Ref": "TestSecret"
+          }
+        }
+      }
+    }
+  },
   "Resources": {
-    "LambdaAnnotationsWithPowertoolsFunctionsDefaultGenerated": {
+    "TestParameter": {
+      "Type": "AWS::SSM::Parameter",
+      "Properties": {
+        "Name": "/powertools/param1",
+        "Type": "String",
+        "Description": "SSM Parameter for Testing",
+        "Value": "TestValue"
+      }
+    },
+    "TestSecret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Name": "PowerToolsSecret",
+        "SecretString": "TestEnvironment"
+      }
+    },
+    "DataTable": {
+      "Type": "AWS::Serverless::SimpleTable",
+      "Properties": {
+        "TableName": "dataTable",
+        "PrimaryKey": {
+          "Name": "id",
+          "Type": "String"
+        }
+      }
+    },
+    "StorageBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Join": [
+            "-",
+            [
+              "annotations-bucket",
+              {
+                "Ref": "AWS::AccountId"
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "DefaultFunction": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
@@ -14,11 +76,9 @@
       "Properties": {
         "Runtime": "dotnet6",
         "CodeUri": ".",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
         "PackageType": "Zip",
         "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_Default_Generated::Default",
         "Events": {
@@ -32,7 +92,7 @@
         }
       }
     },
-    "LambdaAnnotationsWithPowertoolsFunctionsAddGenerated": {
+    "ReadParameter": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
@@ -43,83 +103,77 @@
       "Properties": {
         "Runtime": "dotnet6",
         "CodeUri": ".",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
         "PackageType": "Zip",
-        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_Add_Generated::Add",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_ReadParameter_Generated::ReadParameter",
         "Events": {
           "RootGet": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/add/{x}/{y}",
+              "Path": "/readparameter",
               "Method": "GET"
             }
           }
         }
       }
     },
-    "LambdaAnnotationsWithPowertoolsFunctionsSubtractGenerated": {
+    "WriteParameter": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
-          "RootGet"
+          "RootPost"
         ]
       },
       "Properties": {
         "Runtime": "dotnet6",
         "CodeUri": ".",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
         "PackageType": "Zip",
-        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_Subtract_Generated::Subtract",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_WriteParameter_Generated::WriteParameter",
         "Events": {
-          "RootGet": {
+          "RootPost": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/subtract/{x}/{y}",
-              "Method": "GET"
+              "Path": "/writeparameter",
+              "Method": "POST"
             }
           }
         }
       }
     },
-    "LambdaAnnotationsWithPowertoolsFunctionsMultiplyGenerated": {
+    "WriteTableItem": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
-          "RootGet"
+          "RootPost"
         ]
       },
       "Properties": {
         "Runtime": "dotnet6",
         "CodeUri": ".",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
         "PackageType": "Zip",
-        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_Multiply_Generated::Multiply",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_WriteTableItem_Generated::WriteTableItem",
         "Events": {
-          "RootGet": {
+          "RootPost": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/multiply/{x}/{y}",
-              "Method": "GET"
+              "Path": "/writetableitem",
+              "Method": "POST"
             }
           }
         }
       }
     },
-    "LambdaAnnotationsWithPowertoolsFunctionsDivideGenerated": {
+    "ReadTableItem": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
@@ -130,18 +184,16 @@
       "Properties": {
         "Runtime": "dotnet6",
         "CodeUri": ".",
-        "MemorySize": 256,
+        "MemorySize": 1024,
         "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
         "PackageType": "Zip",
-        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_Divide_Generated::Divide",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_ReadTableItem_Generated::ReadTableItem",
         "Events": {
           "RootGet": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/divide/{x}/{y}",
+              "Path": "/readtableitem/{id}",
               "Method": "GET"
             }
           }

@@ -1,0 +1,130 @@
+Demo - 
+1) Show DynamoDB Read and Write
+2) Show Parameter Store Read and Write
+
+
+
+
+Environment Variables
+=====================
+
+"POWERTOOLS_SERVICE_NAME": "PowertoolsDemoService",
+
+"POWERTOOLS_LOG_LEVEL": "Debug",
+
+"POWERTOOLS_LOGGER_CASE": "CamelCase",
+
+"POWERTOOLS_LOGGER_LOG_EVENT": "true",
+
+"POWERTOOLS_LOGGER_SAMPLE_RATE": "0",
+
+"POWERTOOLS_METRICS_NAMESPACE": "PowertoolsDemoMetrics",
+
+"POWERTOOLS_TRACE_DISABLED": "false",
+
+"POWERTOOLS_TRACER_CAPTURE_RESPONSE": "true",
+
+"POWERTOOLS_TRACER_CAPTURE_ERROR": "true"
+
+
+
+Annotations - Logging
+======================
+
+[Logging(CorrelationIdPath = CorrelationIdPaths.API_GATEWAY_REST)]
+
+   var lookupInfo = new Dictionary<string, object>()
+    {
+        {"LookupInfo", new Dictionary<string, object>{{ "extradata", id }}}
+    }; 
+
+-- Add Logger.Information()... 
+
+
+Annotations - Tracing
+======================
+
+- Add Active Tracing to the Lambda Functions
+
+[Tracing]
+
+
+Add a subsegment
+Tracing.WithSubsegment("loggingResponse", (subsegment) => {
+    await Task.Delay(DateTime.Now.Milliseconds);
+});
+
+
+
+Annotations - Metrics
+=====================
+
+[Metrics(CaptureColdStart = true)]
+
+ Metrics.AddMetric("AmountAdded", item.Amount, MetricUnit.Count);
+
+
+  private Dictionary<string, string> _dynamoDimensions = new Dictionary<string, string>{
+        {"Environment", "Prod"},
+        {"Application", "Dynamo"}
+  }; 
+  Metrics.SetDefaultDimensions(_dynamoDimensions);
+
+  private Dictionary<string, string> _parameterDimensions = new Dictionary<string, string>{
+        {"Environment", "Prod"},
+        {"Application", "Parameter"}
+  }; 
+    Metrics.SetDefaultDimensions(_parameterDimensions);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

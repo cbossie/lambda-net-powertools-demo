@@ -5,6 +5,11 @@ VisualStudioVersion = 17.4.33403.182
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaAnnotationsWithPowertools", "LambdaAnnotationsWithPowertools\LambdaAnnotationsWithPowertools.csproj", "{FF09C392-394E-414A-9561-E9C8CACA27B8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{78F69488-8CBA-40B3-90EA-880F327D94B4}"
+	ProjectSection(SolutionItems) = preProject
+		DemoTestData.txt = DemoTestData.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

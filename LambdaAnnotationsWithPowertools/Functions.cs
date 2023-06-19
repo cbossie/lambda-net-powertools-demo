@@ -1,6 +1,12 @@
 using Amazon.Lambda.Core;
 using Amazon.Lambda.Annotations;
 using Amazon.Lambda.Annotations.APIGateway;
+using Amazon.SimpleSystemsManagement;
+using LambdaAnnotationsWithPowertools.Support;
+using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
+using Amazon.DynamoDBv2.Model.Internal.MarshallTransformations;
+using System.Runtime.CompilerServices;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -11,6 +17,8 @@ namespace LambdaAnnotationsWithPowertools;
 /// </summary>
 public class Functions
 {
+    const string ROLE = "arn:aws:iam::425173371283:role/lambda-role";
+
     /// <summary>
     /// Default constructor.
     /// </summary>
@@ -22,52 +30,133 @@ public class Functions
     /// Root route that provides information about the other requests that can be made.
     /// </summary>
     /// <returns>API descriptions.</returns>
-    [LambdaFunction()]
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "DefaultFunction")]
     [HttpApi(LambdaHttpMethod.Get, "/")]
     public string Default()
     {
-        var docs = @"Lambda Calculator Home:
-You can make the following requests to invoke other Lambda functions perform calculator operations:
-/add/{x}/{y}
-/subtract/{x}/{y}
-/multiply/{x}/{y}
-/divide/{x}/{y}
+        var docs = @"Here are the functions that you can call:
+
+
 ";
         return docs;
     }
 
 
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/add/{x}/{y}")]
-    public int Add(int x, int y, ILambdaContext context)
+    #region Systems Manager
+
+    /// <summary>
+    /// Reads a Value from SSM Parameter Store
+    /// </summary>
+    /// <param name="context"></param>
+    /// <param name="ssmClient"></param>
+    /// <returns></returns>
+
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "ReadParameter")]
+    [HttpApi(LambdaHttpMethod.Get, "/readparameter")]
+    public async Task<string> ReadParameter(ILambdaContext context, [FromServices] IAmazonSimpleSystemsManagement ssmClient)
     {
-        context.Logger.LogInformation($"{x} plus {y} is {x + y}");
-        return x + y;
+        var parameterValue = await ssmClient.GetParameterAsync(new()
+        {
+            Name = GetEnv("PARAMETER")
+        });
+        return parameterValue.Parameter.Value;
     }
 
+    /// <summary>
+    /// Updates SSM Parameter Store Value
+    /// </summary>
+    /// <param name="value"></param>
+    /// <param name="context"></param>
+    /// <param name="ssmClient"></param>
+    /// <returns></returns>
 
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/subtract/{x}/{y}")]
-    public int Subtract(int x, int y, ILambdaContext context)
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "WriteParameter")]
+    [HttpApi(LambdaHttpMethod.Post, "/writeparameter")]
+    public async Task<string> WriteParameter([FromBody] string value, ILambdaContext context, [FromServices] IAmazonSimpleSystemsManagement ssmClient)
     {
-        context.Logger.LogInformation($"{x} subtract {y} is {x - y}");
-        return x - y;
+        var parameterValue = await ssmClient.PutParameterAsync(new()
+        {
+            Name = GetEnv("PARAMETER"),
+            Value = value,
+            Overwrite = true
+        });
+        return $"{GetEnv("PARAMETER")} => {value}";
     }
 
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/multiply/{x}/{y}")]
-    public int Multiply(int x, int y, ILambdaContext context)
+    #endregion
+
+    #region DynamoDB
+
+    /// <summary>
+    /// Writes a value to a DynamoDB Table
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="ctx"></param>
+    /// <param name="dbClient"></param>
+    /// <returns></returns>
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "WriteTableItem")]
+    [HttpApi(LambdaHttpMethod.Post, "/writetableitem")]
+    public async Task<TableItem> WriteTableItem([FromBody] TableItem item, ILambdaContext ctx, [FromServices] IAmazonDynamoDB dbClient)
     {
-        context.Logger.LogInformation($"{x} multiply {y} is {x * y}");
-        return x * y;
+        var result = await dbClient.PutItemAsync(new()
+        {
+            TableName = GetEnv("TABLE"),
+            Item = new() {
+                { "id", new AttributeValue { S = item.Id } },
+                { "value", new AttributeValue { S = item.Value } },
+                { "amount", new AttributeValue { N = item.Amount.ToString() }
+            }
+
+        }
+        });
+
+        return item;
     }
 
-
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Get, "/divide/{x}/{y}")]
-    public int Divide(int x, int y, ILambdaContext context)
+    /// <summary>
+    /// Reads a value from DynamoDB
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="ctx"></param>
+    /// <param name="dbClient"></param>
+    /// <returns></returns>
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "ReadTableItem")]
+    [HttpApi(LambdaHttpMethod.Get, "/readtableitem/{id}")]
+    public async Task<TableItem> ReadTableItem(string id, ILambdaContext ctx, [FromServices] IAmazonDynamoDB dbClient)
     {
-        context.Logger.LogInformation($"{x} divide {y} is {x / y}");
-        return x / y;
+        var result = await dbClient.GetItemAsync(new()
+        {
+            TableName = GetEnv("TABLE"),
+            Key = new()
+            {
+                { "id", new AttributeValue { S = id } }
+
+            }
+        });
+
+        if (result.Item is null)
+        {
+            return new TableItem
+            {
+                Id = id,
+                Value = "ITEM NOT FOUND",
+                Amount = -1
+            };
+        }
+
+        return new TableItem
+        {
+            Id = result.Item["id"].S,
+            Value = result.Item["value"].S,
+            Amount = int.Parse(result.Item["amount"].N)
+        };
+
     }
+
+    #endregion
+
+
+
+    private string GetEnv(string name) => Environment.GetEnvironmentVariable(name);
+
 }

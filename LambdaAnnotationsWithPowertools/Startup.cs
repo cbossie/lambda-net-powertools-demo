@@ -1,4 +1,5 @@
 using Amazon;
+using Amazon.CloudWatch;
 using Amazon.DynamoDBv2;
 using Amazon.S3;
 using Amazon.SecretsManager;
@@ -17,5 +18,6 @@ public class Startup
         services.AddAWSService<IAmazonDynamoDB>();
         services.AddAWSService<IAmazonSimpleSystemsManagement>();
         services.AddAWSService<IAmazonSecretsManager>();
+        services.AddAWSService<IAmazonCloudWatch>();
     }
 }

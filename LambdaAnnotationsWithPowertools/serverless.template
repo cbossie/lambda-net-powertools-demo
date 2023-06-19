@@ -4,8 +4,18 @@
   "Description": "An AWS Serverless Application. This template is partially managed by Amazon.Lambda.Annotations (v0.13.2.0).",
   "Globals": {
     "Function": {
+      "Tracing": "Active",
       "Environment": {
         "Variables": {
+          "POWERTOOLS_METRICS_NAMESPACE": "PowertoolsDemoMetrics",
+          "POWERTOOLS_LOG_LEVEL": "Debug",
+          "POWERTOOLS_LOGGER_CASE": "PascalCase",
+          "POWERTOOLS_LOGGER_LOG_EVENT": "True",
+          "POWERTOOLS_LOGGER_SAMPLE_RATE": "0",
+          "POWERTOOLS_SERVICE_NAME": "PTDemo",
+          "POWERTOOLS_TRACE_DISABLED": "False",
+          "POWERTOOLS_TRACER_CAPTURE_RESPONSE": "True",
+          "POWERTOOLS_TRACER_CAPTURE_ERROR": "True",
           "TABLE": {
             "Ref": "DataTable"
           },
@@ -252,6 +262,21 @@
             }
           }
         }
+      }
+    },
+    "XRayFunction": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations"
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 1024,
+        "Timeout": 30,
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
+        "PackageType": "Zip",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_DemoFunction_Generated::DemoFunction"
       }
     }
   },

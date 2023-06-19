@@ -7,6 +7,8 @@ using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using Amazon.DynamoDBv2.Model.Internal.MarshallTransformations;
 using System.Runtime.CompilerServices;
+using Amazon.S3;
+using System.Text;
 
 [assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
@@ -155,7 +157,64 @@ public class Functions
 
     #endregion
 
+    #region S3
 
+    /// <summary>
+    /// Write Text to a file in S3
+    /// </summary>
+    /// <param name="item"></param>
+    /// <param name="context"></param>
+    /// <param name="s3Client"></param>
+    /// <returns></returns>
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "WriteS3")]
+    [HttpApi(LambdaHttpMethod.Post, "/writeS3item")]
+    public async Task<string> WriteS3Item([FromBody]S3Item item, ILambdaContext context, [FromServices] IAmazonS3 s3Client)
+    {
+        var result = await s3Client.PutObjectAsync(new() 
+        {
+            BucketName = GetEnv("BUCKET"),
+            Key = item.Key,
+            ContentBody= item.Content
+        });
+
+        return $"{item.Key} created.";
+    }
+
+    /// <summary>
+    /// Read value from S3
+    /// </summary>
+    /// <param name="key"></param>
+    /// <param name="context"></param>
+    /// <param name="s3Client"></param>
+    /// <returns></returns>
+    [LambdaFunction(MemorySize = 1024, Role = ROLE, ResourceName = "ReadS3")]
+    [HttpApi(LambdaHttpMethod.Get, "/readS3item/{key}")]
+    public async Task<string> ReadS3Item(string key, ILambdaContext context, [FromServices] IAmazonS3 s3Client)
+    {
+        string content;
+
+        var result = await s3Client.GetObjectAsync(new() 
+        {
+            BucketName = GetEnv("BUCKET"),
+            Key = key,
+        });
+
+        if(result.HttpStatusCode != System.Net.HttpStatusCode.OK)
+        {
+           return "Not Found!";
+        }
+
+        using(MemoryStream str = new())
+        {
+            result.ResponseStream.CopyTo(str);
+            content = Encoding.ASCII.GetString(str.ToArray());
+        }
+        return content;
+
+    }
+
+
+    #endregion
 
     private string GetEnv(string name) => Environment.GetEnvironmentVariable(name);
 

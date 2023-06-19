@@ -199,6 +199,60 @@
           }
         }
       }
+    },
+    "ReadS3": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 1024,
+        "Timeout": 30,
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
+        "PackageType": "Zip",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_ReadS3Item_Generated::ReadS3Item",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/readS3item/{key}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "WriteS3": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ]
+      },
+      "Properties": {
+        "Runtime": "dotnet6",
+        "CodeUri": ".",
+        "MemorySize": 1024,
+        "Timeout": 30,
+        "Role": "arn:aws:iam::425173371283:role/lambda-role",
+        "PackageType": "Zip",
+        "Handler": "LambdaAnnotationsWithPowertools::LambdaAnnotationsWithPowertools.Functions_WriteS3Item_Generated::WriteS3Item",
+        "Events": {
+          "RootPost": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/writeS3item",
+              "Method": "POST"
+            }
+          }
+        }
+      }
     }
   },
   "Outputs": {

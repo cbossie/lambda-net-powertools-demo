@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Assets", "Assets", "{78F69488-8CBA-40B3-90EA-880F327D94B4}"
 	ProjectSection(SolutionItems) = preProject
 		DemoTestData.txt = DemoTestData.txt
+		SampleRequests.json = SampleRequests.json
 	EndProjectSection
 EndProject
 Global

@@ -74,7 +74,7 @@ Annotations - Metrics
         {"Environment", "Prod"},
         {"Application", "Parameter"}
   }; 
-    Metrics.SetDefaultDimensions(_parameterDimensions);
+  Metrics.SetDefaultDimensions(_parameterDimensions);
 
 
 

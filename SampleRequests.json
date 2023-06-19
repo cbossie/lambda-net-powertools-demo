@@ -1,0 +1,118 @@
+{
+	"client": "Thunder Client",
+	"collectionName": "PowerToolsSamples",
+	"dateExported": "2023-06-19T02:32:45.047Z",
+	"version": "1.1",
+	"folders": [],
+	"requests": [
+		{
+			"_id": "a8e0bc0d-c0bc-4e89-af1a-f8808097a83f",
+			"colId": "cb9d419f-9ea3-4400-8673-56bbe9cba807",
+			"containerId": "",
+			"name": "WriteParameter",
+			"url": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/writeparameter",
+			"method": "POST",
+			"sortNum": 10000,
+			"created": "2023-06-19T01:03:59.195Z",
+			"modified": "2023-06-19T01:03:59.195Z",
+			"headers": [],
+			"params": [],
+			"body": {
+				"type": "json",
+				"raw": "Craig",
+				"form": []
+			},
+			"tests": []
+		},
+		{
+			"_id": "c527a743-cf90-4676-8cf1-699fc97c5a76",
+			"colId": "cb9d419f-9ea3-4400-8673-56bbe9cba807",
+			"containerId": "",
+			"name": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/readparameter",
+			"url": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/readS3item/abcde",
+			"method": "GET",
+			"sortNum": 20000,
+			"created": "2023-06-19T01:04:14.533Z",
+			"modified": "2023-06-19T02:27:11.470Z",
+			"headers": [],
+			"params": [],
+			"body": {
+				"type": "json",
+				"raw": "\"hello\"",
+				"form": []
+			},
+			"tests": []
+		},
+		{
+			"_id": "f0e05c12-a314-472b-a4e0-d9a5248aa91d",
+			"colId": "cb9d419f-9ea3-4400-8673-56bbe9cba807",
+			"containerId": "",
+			"name": "Write Table Item",
+			"url": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/writetableitem",
+			"method": "POST",
+			"sortNum": 30000,
+			"created": "2023-06-19T01:28:18.786Z",
+			"modified": "2023-06-19T01:32:22.834Z",
+			"headers": [],
+			"params": [],
+			"body": {
+				"type": "json",
+				"raw": "{\n  \"id\":\"abcde\",\n  \"value\" : \"TestItem3\",\n  \"amount\" : 45\n}",
+				"form": []
+			},
+			"tests": []
+		},
+		{
+			"_id": "121d9c8b-ca44-4b59-bf23-5bd436b08d51",
+			"colId": "cb9d419f-9ea3-4400-8673-56bbe9cba807",
+			"containerId": "",
+			"name": "Read Table Item",
+			"url": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/readtableitem/abcde",
+			"method": "GET",
+			"sortNum": 40000,
+			"created": "2023-06-19T01:32:12.163Z",
+			"modified": "2023-06-19T01:32:12.163Z",
+			"headers": [],
+			"params": [],
+			"body": {
+				"type": "json",
+				"raw": "\"hello\"",
+				"form": []
+			},
+			"tests": []
+		},
+		{
+			"_id": "87357b56-5daf-4231-b46e-f56274809ae1",
+			"colId": "cb9d419f-9ea3-4400-8673-56bbe9cba807",
+			"containerId": "",
+			"name": "Write S3 Item",
+			"url": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/writeS3item",
+			"method": "POST",
+			"sortNum": 50000,
+			"created": "2023-06-19T02:26:30.147Z",
+			"modified": "2023-06-19T02:26:30.147Z",
+			"headers": [],
+			"params": [],
+			"body": {
+				"type": "json",
+				"raw": "{\n  \"key\":\"abcde\",\n  \"content\" : \"This is S3 Data\"\n}",
+				"form": []
+			},
+			"tests": []
+		},
+		{
+			"_id": "be780274-bcc3-4de6-9cb1-082b780ed091",
+			"colId": "cb9d419f-9ea3-4400-8673-56bbe9cba807",
+			"containerId": "",
+			"name": "Read S3 Item",
+			"url": "https://m01utl0x7k.execute-api.us-east-2.amazonaws.com/readS3item/abcde",
+			"method": "GET",
+			"sortNum": 60000,
+			"created": "2023-06-19T02:32:02.393Z",
+			"modified": "2023-06-19T02:32:02.393Z",
+			"headers": [],
+			"params": [],
+			"tests": []
+		}
+	]
+}

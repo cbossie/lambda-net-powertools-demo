@@ -1,9 +1,18 @@
 Demo - 
-1) Show DynamoDB Read and Write
-2) Show Parameter Store Read and Write
+
+1] Introductory Information
+Show DynamoDB Read and Write
+Show S3 Read and Write
 
 
+2] Let's Add the PowerTools Libraries
+Nuget Package Manager
 
+3] Configure the project for XRAY
+AWSSDKHandler.RegisterXRayForAllServices();
+
+
+4] Update the Environment Variables
 
 Environment Variables
 =====================
@@ -28,10 +37,9 @@ Environment Variables
 
 
 
-Annotations - Logging
+5] Annotations - Logging
 ======================
-
-[Logging(CorrelationIdPath = CorrelationIdPaths.API_GATEWAY_REST)]
+[Logging]
 
    var lookupInfo = new Dictionary<string, object>()
     {
@@ -41,11 +49,9 @@ Annotations - Logging
 -- Add Logger.Information()... 
 
 
-Annotations - Tracing
+6] Annotations - Tracing
 ======================
-
 - Add Active Tracing to the Lambda Functions
-
 - Update SDK to trace
 
  AWSSDKHandler.RegisterXRayForAllServices();
@@ -54,28 +60,30 @@ Annotations - Tracing
 
 
 Add a subsegment
-Tracing.WithSubsegment("loggingResponse", async (subsegment) => {
-    await Task.Delay(DateTime.Now.Millisecond);
-});
+[Tracing(Segment="DD")]
 
 
-
-Annotations - Metrics
+7]Annotations - Metrics
 =====================
-
-
+On the "Write Item"
 
 
 [Metrics(CaptureColdStart = true)]
 
  Metrics.AddMetric("AmountAdded", item.Amount, MetricUnit.Count);
 
-
+ (outside the function)
   private Dictionary<string, string> _dynamoDimensions = new Dictionary<string, string>{
         {"Environment", "Prod"},
         {"Application", "Dynamo"}
   }; 
+
+
+  (Inside the Add to Table Function)
   Metrics.SetDefaultDimensions(_dynamoDimensions);
+
+  Metrics.AddMetric()....
+
 
   private Dictionary<string, string> _parameterDimensions = new Dictionary<string, string>{
         {"Environment", "Prod"},

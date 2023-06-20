@@ -7,89 +7,101 @@ Show S3 Read and Write
 
 2] Let's Add the PowerTools Libraries
 Nuget Package Manager
+- AWSXRAYRecorder.Handlers.AwsSdk
+- AWS.Lambda.Powertools.Logging
+- AWS.Lambda.Powertools.Tracing
+- AWS.Lambda.Powertools.Metrics
+
 
 3] Configure the project for XRAY
 AWSSDKHandler.RegisterXRayForAllServices();
 
 
-4] Update the Environment Variables
+
+
+4] UPDATE SAM Template
+
+
+
 
 Environment Variables
 =====================
 
+
+
+
 "POWERTOOLS_SERVICE_NAME": "PowertoolsDemoService",
-
 "POWERTOOLS_LOG_LEVEL": "Debug",
-
 "POWERTOOLS_LOGGER_CASE": "CamelCase",
-
 "POWERTOOLS_LOGGER_LOG_EVENT": "true",
-
 "POWERTOOLS_LOGGER_SAMPLE_RATE": "0",
-
 "POWERTOOLS_METRICS_NAMESPACE": "PowertoolsDemoMetrics",
-
 "POWERTOOLS_TRACE_DISABLED": "false",
-
 "POWERTOOLS_TRACER_CAPTURE_RESPONSE": "true",
-
-"POWERTOOLS_TRACER_CAPTURE_ERROR": "true"
+"POWERTOOLS_TRACER_CAPTURE_ERROR": "true",
 
 
 
 5] Annotations - Logging
 ======================
-[Logging]
+a) For both functions
+[Logging (ClearState = true)]
 
-   var lookupInfo = new Dictionary<string, object>()
-    {
-        {"LookupInfo", new Dictionary<string, object>{{ "extradata", id }}}
-    }; 
+b) In "Read Table Item" Function
 
--- Add Logger.Information()... 
+
+var logInfo = new Dictionary<string, object>()
+{
+    {"LookupInfo", new Dictionary<string, object>{{ "additionalinfo", id }}}
+};
+Logger.AppendKeys(logInfo);
+
+-- In the read function, around the API call
+Logger.LogInformation("Commencing Table Read");
+...
+Logger.LogInformation("Finishing Table Read");
+
 
 
 6] Annotations - Tracing
 ======================
-- Add Active Tracing to the Lambda Functions
-- Update SDK to trace
+- Add Active Tracing to the Lambda Functions in the function (if you did not already)
+- Include Nuget Package AWSXRAYRecorder.Handlers.AwsSdk
+- In constructor: AWSSDKHandler.RegisterXRayForAllServices();
 
- AWSSDKHandler.RegisterXRayForAllServices();
 
+a) For both functions
 [Tracing]
 
+Add
+[Tracing(SegmentName = "GetEnv")]
 
-Add a subsegment
-[Tracing(Segment="DD")]
+on the "GetEnv" function
+
+
 
 
 7]Annotations - Metrics
 =====================
-On the "Write Item"
-
-
+On both DynamoDB functions""
 [Metrics(CaptureColdStart = true)]
 
- Metrics.AddMetric("AmountAdded", item.Amount, MetricUnit.Count);
 
- (outside the function)
+ -- outside the functions
   private Dictionary<string, string> _dynamoDimensions = new Dictionary<string, string>{
         {"Environment", "Prod"},
         {"Application", "Dynamo"}
   }; 
 
 
-  (Inside the Add to Table Function)
-  Metrics.SetDefaultDimensions(_dynamoDimensions);
+-- Inside both functions
+Metrics.SetDefaultDimensions(_dynamoDimensions);
 
-  Metrics.AddMetric()....
+-- Write Table Item
+ Metrics.AddMetric("AmountAdded", item.Amount, MetricUnit.Count);
 
 
-  private Dictionary<string, string> _parameterDimensions = new Dictionary<string, string>{
-        {"Environment", "Prod"},
-        {"Application", "Parameter"}
-  }; 
-  Metrics.SetDefaultDimensions(_parameterDimensions);
+ (Takes a few minutes to get there)
 
 
 
